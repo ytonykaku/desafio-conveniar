@@ -11,6 +11,8 @@ abstract class BaseController
 
     protected function view(string $viewPath, array $data = []): void
     {
+        $data['currentUri'] = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        
         extract($data);
 
         require_once ROOT . '/src/Views/layouts/header.php';

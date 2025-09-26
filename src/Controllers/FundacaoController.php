@@ -2,7 +2,7 @@
 namespace Src\Controllers;
 
 use PDO;
-use Fundacao;
+use Src\Models\Fundacao;
 use Src\Repositories\FundacaoRepository;
 
 class FundacaoController extends BaseController

@@ -13,8 +13,6 @@ class DatabaseConfig
 
     public function __construct(array $config)
     {
-        $config = require ROOT . 'config/database.php';
-
         $this->driver = $config['driver'];
         $this->host = $config['host'];
         $this->port = $config['port'];

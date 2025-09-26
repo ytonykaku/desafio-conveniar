@@ -1,0 +1,9 @@
+{
+    "name": "antonio/desafio-conveniar",
+    "description": "Desafio técnico",
+    "autoload": {
+        "psr-4": {
+            "Src\\": "src/"
+        }
+    }
+}

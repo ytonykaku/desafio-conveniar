@@ -1,5 +1,3 @@
-<?php
-?>
 <div class="mb-4">
     <label for="<?= htmlspecialchars($name) ?>" class="block text-gray-700 font-semibold mb-2">
         <?= htmlspecialchars($label) ?>

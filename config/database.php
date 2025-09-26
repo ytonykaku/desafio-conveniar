@@ -4,7 +4,7 @@ return [
     'driver' => 'pgsql',
     'host' => 'localhost',
     'port' => '5432',
-    'database' => 'fundacoes_de_apoio',
+    'database' => 'desafio_conveniar',
     'username' => 'admin',
     'password' => '123',
     'charset' => 'utf8',

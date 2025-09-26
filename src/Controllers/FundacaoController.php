@@ -99,7 +99,7 @@ class FundacaoController extends BaseController
             echo json_encode(['success' => false, 'message' => 'Fundação não encontrada.']);
             exit;
         }
-        
+
         $fundacao->nome = trim($_POST['nome']);
         $fundacao->cnpj = $cnpj;
         $fundacao->email = trim($_POST['email']);
@@ -110,6 +110,27 @@ class FundacaoController extends BaseController
             echo json_encode(['success' => true, 'fundacao' => $fundacao]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Erro ao atualizar a fundação.']);
+        }
+        exit;
+    }
+
+    public function find()
+    {
+        header('Content-Type: application/json');
+
+        $cnpj = $_GET['cnpj'] ?? '';
+
+        if (empty($cnpj)) {
+            echo json_encode(['success' => false, 'message' => 'CNPJ não fornecido.']);
+            exit;
+        }
+
+        $fundacao = $this->fundacaoRepository->findByCnpj($cnpj);
+
+        if ($fundacao) {
+            echo json_encode(['success' => true, 'fundacao' => $fundacao]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Fundação não encontrada.']);
         }
         exit;
     }

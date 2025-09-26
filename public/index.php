@@ -68,6 +68,10 @@ switch ($uri) {
     case '/fundacoes/atualizar':
         $controller->update();
         break;
+    
+    case '/fundacoes/buscar':
+        $controller->find();
+        break;
 
     default:
         http_response_code(404);

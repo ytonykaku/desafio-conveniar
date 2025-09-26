@@ -1,4 +1,19 @@
 <div class="bg-white p-8 rounded-lg shadow-md w-full">
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Buscar por CNPJ</h2>
+        <form id="search-form" class="flex items-center space-x-4">
+            <div class="flex-grow">
+                <label for="cnpj-busca" class="sr-only">CNPJ</label>
+                <input type="text" id="cnpj-busca" name="cnpj" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                       placeholder="Digite o CNPJ"
+                       data-mask="00.000.000/0000-00">
+            </div>
+            <button type="submit" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700">
+                Buscar
+            </button>
+        </form>
+    </div>
     <?php if (empty($fundacoes)): ?>
         <div class="text-center text-gray-500">
             <p>Nenhuma fundação cadastrada ainda.</p>
@@ -163,4 +178,51 @@ document.addEventListener('click', function(event) {
         });
     }
 });
+
+const searchForm = document.getElementById('search-form');
+if (searchForm) {
+    searchForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const cnpjInput = document.getElementById('cnpj-busca');
+        const cnpj = cnpjInput.value;
+
+        if (!cnpj) {
+            Swal.fire('Atenção!', 'Por favor, digite um CNPJ para buscar.', 'warning');
+            return;
+        }
+
+        fetch(`/fundacoes/buscar?cnpj=${encodeURIComponent(cnpj)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const fundacao = data.fundacao;
+                    Swal.fire({
+                        title: 'Fundação Encontrada!',
+                        icon: 'success',
+                        html: `
+                            <div class="text-left p-4">
+                                <p><strong>ID:</strong> ${fundacao.id}</p>
+                                <p><strong>Nome:</strong> ${fundacao.nome}</p>
+                                <p><strong>CNPJ:</strong> ${fundacao.cnpj}</p>
+                                <p><strong>E-mail:</strong> ${fundacao.email}</p>
+                                <p><strong>Telefone:</strong> ${fundacao.telefone || 'Não informado'}</p>
+                                <p><strong>Instituição Apoiada:</strong> ${fundacao.instituicao_apoiada || 'Não informado'}</p>
+                            </div>
+                        `
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Não encontrado',
+                        text: data.message,
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Erro na busca:', error);
+                Swal.fire('Ops!', 'Ocorreu um erro na busca. Tente novamente.', 'error');
+            });
+    });
+}
 </script>

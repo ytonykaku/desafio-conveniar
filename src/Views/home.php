@@ -15,7 +15,7 @@
             <a href="/fundacoes/cadastrar" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
                 Cadastrar Apoio
             </a>
-            <a href="/apoiadores" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+            <a href="/fundacoes/listar" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
                 Ver Apoiadores
             </a>
         </div>

@@ -8,10 +8,10 @@
             <?php
             $fields = [
                 ['type' => 'text', 'name' => 'nome', 'label' => 'Nome da Fundação', 'required' => true],
-                ['type' => 'text', 'name' => 'cnpj', 'label' => 'CNPJ', 'required' => true],
-                ['type' => 'email', 'name' => 'email', 'label' => 'E-mail', 'required' => true],
-                ['type' => 'tel', 'name' => 'telefone', 'label' => 'Telefone', 'required' => false],
-                ['type' => 'text', 'name' => 'instituicao_apoiada', 'label' => 'Instituição Apoiada', 'required' => false],
+                ['type' => 'text', 'name' => 'cnpj', 'label' => 'CNPJ', 'required' => true, 'mask' => '00.000.000/\0\0\01-00'],
+                ['type' => 'email', 'name' => 'email', 'label' => 'E-mail', 'required' => false],
+                ['type' => 'tel', 'name' => 'telefone', 'label' => 'Telefone', 'required' => false, 'mask' => '(00) 00000-0000'],
+                ['type' => 'text', 'name' => 'instituicao_apoiada', 'label' => 'Instituição Apoiada', 'required' => true],
             ];
 
             foreach ($fields as $field) {
@@ -19,6 +19,7 @@
                 $name = $field['name'];
                 $label = $field['label'];
                 $required = $field['required'];
+                $mask = $field['mask'] ?? null;
                 require ROOT . '/src/Views/components/input_field.php';
             }
             ?>
@@ -33,27 +34,51 @@
 </div>
 
 <script>
-    documento.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get('status');
-        const message = urlParams.get('message');
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
 
-        if (status === 'error') {
-            let errorMessage = 'Ocorreu um erro ao cadastrar a fundação.';
-            if (message === 'cnpj_duplicado') {
-                errorMessage = 'Erro: O CNPJ informado já está cadastrado.';
-            }
-            const errorDiv = document.createElement('div');
-            errorDiv.style.backgroundColor = '#f8d7da';
-            errorDiv.style.color = '#721c24';
-            errorDiv.style.padding = '1rem';
-            errorDiv.style.border = '1px solid #f5c6cb';
-            errorDiv.style.borderRadius = '.25rem';
-            errorDiv.style.marginBottom = '1rem';
-            errorDiv.textContent = errorMessage;
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-            const formContainer = document.querySelector('.bg-white');
-            formContainer.insertBefore(errorDiv, formContainer.firstChild);
-        }
+            const formData = new FormData(form);
+
+            fetch('/fundacoes/salvar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Sucesso!',
+                        html: `
+                            Fundação de Apoio cadastrada com sucesso.<br><br>
+                            <strong>Nome:</strong> ${data.fundacao.nome}<br>
+                            <strong>CNPJ:</strong> ${data.fundacao.cnpj}<br>
+                            <strong>Instituição apoiada:</strong> ${data.fundacao.instituicao_apoiada}
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'Ótimo!'
+                    });
+                    form.reset();
+                } else {
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar o formulário:', error);
+                Swal.fire({
+                    title: 'Ops!',
+                    text: 'Ocorreu um erro. Tente novamente.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        });
     });
 </script>

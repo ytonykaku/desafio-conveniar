@@ -22,15 +22,25 @@ class FundacaoController extends BaseController
 
     public function store()
     {
+        header('Content-Type: application/json');
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirect('/fundacoes/cadastrar');
+            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
+            exit;
         }
-        
-        $cnpj = trim($_POST['cnpj']);
+
+        $cnpj = preg_replace('/[^0-9]/', '', $_POST['cnpj']);
+
+        if (strlen($cnpj) !== 14) {
+            echo json_encode(['success' => false, 'message' => 'O CNPJ fornecido é inválido.']);
+            exit;
+        }
+
         $fundacaoExistente = $this->fundacaoRepository->findByCnpj($cnpj);
         
         if ($fundacaoExistente) {
-            $this->redirect('/fundacoes/cadastrar?status=error&message=cnpj_duplicado');
+            echo json_encode(['success' => false, 'message' => 'Este CNPJ já foi cadastrado.']);
+            exit;
         }
 
         $fundacao = new Fundacao(
@@ -42,9 +52,12 @@ class FundacaoController extends BaseController
         );
 
         if ($this->fundacaoRepository->save($fundacao)) {
-            $this->redirect('/?status=success');
+            $fundacao->id = $this->connection->lastInsertId();
+            
+            echo json_encode(['success' => true, 'fundacao' => $fundacao]);
         } else {
-            $this->redirect('/fundacoes/cadastrar?status=error');
+            echo json_encode(['success' => false, 'message' => 'Ocorreu um erro ao salvar no banco de dados.']);
         }
+        exit;
     }
 }

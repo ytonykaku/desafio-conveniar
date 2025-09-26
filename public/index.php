@@ -46,10 +46,7 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 switch ($uri) {
     case '/':
-        if (isset($_GET['status']) && $_GET['status'] === 'success') {
-            echo '<div style="background-color: #d4edda; color: #155724; padding: 1rem; border: 1px solid #c3e6cb; border-radius: .25rem; margin-bottom: 1rem;">Cadastro efetuado com sucesso!</div>';
-        }
-        echo '<h1>Página Inicial</h1><a href="/fundacoes/cadastrar">Cadastrar Nova Fundação</a>';
+        $controller->index();
         break;
     
     case '/fundacoes/cadastrar':
@@ -66,6 +63,10 @@ switch ($uri) {
 
     case '/fundacoes/deletar':
         $controller->destroy();
+        break;
+    
+    case '/fundacoes/atualizar':
+        $controller->update();
         break;
 
     default:

@@ -51,6 +51,27 @@ class FundacaoRepository
         return $fundacoes;
     }
 
+    public function findById(int $id): ?Fundacao
+    {
+        $stmt = $this->connection->prepare("SELECT * FROM fundacoes WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $data = $stmt->fetch();
+
+        if ($data) {
+            $fundacao = new Fundacao(
+                $data['nome'],
+                $data['cnpj'],
+                $data['email'],
+                $data['telefone'],
+                $data['instituicao_apoiada']
+            );
+            $fundacao->id = $data['id'];
+            return $fundacao;
+        }
+
+        return null;
+    }
+
     public function save(Fundacao $fundacao): bool
     {
         if (is_null($fundacao->id)) {

@@ -21,7 +21,16 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= htmlspecialchars($fundacao->cnpj) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= htmlspecialchars($fundacao->email) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button class="text-indigo-600 hover:text-indigo-900 btn-edit">Editar</button>
+                            <button 
+                                data-id="<?= $fundacao->id ?>"
+                                data-nome="<?= htmlspecialchars($fundacao->nome) ?>"
+                                data-cnpj="<?= htmlspecialchars($fundacao->cnpj) ?>"
+                                data-email="<?= htmlspecialchars($fundacao->email) ?>"
+                                data-telefone="<?= htmlspecialchars($fundacao->telefone ?? '') ?>"
+                                data-instituicao_apoiada="<?= htmlspecialchars($fundacao->instituicao_apoiada ?? '') ?>"
+                                class="text-indigo-600 hover:text-indigo-900 btn-edit">
+                                Editar
+                            </button>
                             <button data-id="<?= $fundacao->id ?>" data-nome="<?= htmlspecialchars($fundacao->nome) ?>" class="text-red-600 hover:text-red-900 ml-4 btn-delete">Deletar</button>
                         </td>
                     </tr>
@@ -33,6 +42,7 @@
 
 <script>
 document.addEventListener('click', function(event) {
+    
     if (event.target.matches('.btn-delete')) {
         const fundacaoId = event.target.dataset.id;
         const fundacaoNome = event.target.dataset.nome;
@@ -74,6 +84,79 @@ document.addEventListener('click', function(event) {
                             data.message,
                             'error'
                         );
+                    }
+                });
+            }
+        });
+    }
+
+    if (event.target.matches('.btn-edit')) {
+        const button = event.target;
+        const data = button.dataset;
+
+        Swal.fire({
+            title: 'Editar Fundação',
+            html: `
+                <form id="edit-form" class="text-left">
+                    <input type="hidden" name="id" value="${data.id}">
+                    <div class="mb-4">
+                        <label for="swal-nome" class="block font-semibold">Nome</label>
+                        <input id="swal-nome" name="nome" class="swal2-input" value="${data.nome}" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="swal-cnpj" class="block font-semibold">CNPJ</label>
+                        <input id="swal-cnpj" name="cnpj" class="swal2-input" value="${data.cnpj}" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="swal-email" class="block font-semibold">E-mail</label>
+                        <input id="swal-email" name="email" class="swal2-input" value="${data.email}" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="swal-telefone" class="block font-semibold">Telefone</label>
+                        <input id="swal-telefone" name="telefone" class="swal2-input" value="${data.telefone}">
+                    </div>
+                    <div>
+                        <label for="swal-instituicao" class="block font-semibold">Instituição Apoiada</label>
+                        <input id="swal-instituicao" name="instituicao_apoiada" class="swal2-input" value="${data.instituicao_apoiada}">
+                    </div>
+                </form>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar Alterações',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                const form = document.getElementById('edit-form');
+                return new FormData(form);
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = result.value;
+                
+                fetch('/fundacoes/atualizar', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Atualizado!', 'Os dados foram atualizados com sucesso.', 'success');
+                        
+                        const row = document.getElementById('fundacao-row-' + data.fundacao.id);
+                        if (row) {
+                            row.cells[0].textContent = data.fundacao.nome;
+                            row.cells[1].textContent = data.fundacao.cnpj;
+                            row.cells[2].textContent = data.fundacao.email;
+                            
+                            const editButton = row.querySelector('.btn-edit');
+                            editButton.dataset.nome = data.fundacao.nome;
+                            editButton.dataset.cnpj = data.fundacao.cnpj;
+                            editButton.dataset.email = data.fundacao.email;
+                            editButton.dataset.telefone = data.fundacao.telefone;
+                            editButton.dataset.instituicao_apoiada = data.fundacao.instituicao_apoiada;
+                        }
+                    } else {
+                        Swal.fire('Erro!', data.message, 'error');
                     }
                 });
             }

@@ -11,6 +11,17 @@ class Database
 
     private function __construct()
     {
+        if (getenv('DB_DRIVER') === 'sqlite') {
+            $dsn = 'sqlite::memory:';
+            try {
+                $this->connection = new PDO($dsn);
+                $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->connection->exec("CREATE TABLE fundacoes (id INTEGER PRIMARY KEY, nome TEXT, cnpj TEXT UNIQUE, email TEXT, telefone TEXT, instituicao_apoiada TEXT)");
+                return;
+            } catch (PDOException $e) {
+                die('Error connecting to SQLite in-memory DB: ' . $e->getMessage());
+            }
+        }
         $configArray = require ROOT . 'config/database.php';
         $config = new DatabaseConfig($configArray);
 

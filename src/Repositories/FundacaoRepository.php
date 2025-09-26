@@ -30,6 +30,27 @@ class FundacaoRepository
         return null;
     }
 
+    public function findAll(): array
+    {
+        $stmt = $this->connection->query("SELECT * FROM fundacoes ORDER BY nome ASC");
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $fundacoes = [];
+
+        foreach ($results as $data) {
+            $fundacao = new Fundacao(
+                $data['nome'],
+                $data['cnpj'],
+                $data['email'],
+                $data['telefone'],
+                $data['instituicao_apoiada']
+            );
+            $fundacao->id = $data['id'];
+            $fundacoes[] = $fundacao;
+        }
+
+        return $fundacoes;
+    }
+
     public function save(Fundacao $fundacao): bool
     {
         if (is_null($fundacao->id)) {

@@ -60,4 +60,14 @@ class FundacaoController extends BaseController
         }
         exit;
     }
+
+    public function list()
+    {
+        $fundacoes = $this->fundacaoRepository->findAll();
+
+        $this->view('fundacao/list', [
+            'pageTitle' => 'Fundações Cadastradas',
+            'fundacoes' => $fundacoes
+        ]);
+    }
 }

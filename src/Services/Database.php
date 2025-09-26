@@ -1,6 +1,8 @@
 <?php
+namespace Src\Services;
 
-require_once ROOT . 'src/Services/DatabaseConfig.php';
+use PDO;
+use PDOException;
 
 class Database
 {

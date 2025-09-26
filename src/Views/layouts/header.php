@@ -30,8 +30,8 @@
                             class="<?= ($currentUri === '/fundacoes/cadastrar') ? $activeClass : $inactiveClass ?> rounded-md px-3 py-2 text-sm font-medium">
                             Cadastrar Fundação
                             </a>
-                            <a href="/apoiadores"
-                            class="<?= ($currentUri === '/apoiadores') ? $activeClass : $inactiveClass ?> rounded-md px-3 py-2 text-sm font-medium">
+                            <a href="/fundacoes/listar"
+                            class="<?= ($currentUri === '/fundacoes/listar') ? $activeClass : $inactiveClass ?> rounded-md px-3 py-2 text-sm font-medium">
                             Visualizar Apoiadores
                             </a>
                         </div>

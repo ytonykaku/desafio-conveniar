@@ -1,4 +1,8 @@
 <?php
+namespace Src\Repositories;
+
+use PDO;
+use Src\Models\Fundacao;
 
 class FundacaoRepository
 {

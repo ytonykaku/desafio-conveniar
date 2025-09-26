@@ -1,4 +1,5 @@
 <?php
+namespace Src\Models;
 
 class Fundacao
 {

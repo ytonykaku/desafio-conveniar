@@ -70,4 +70,28 @@ class FundacaoController extends BaseController
             'fundacoes' => $fundacoes
         ]);
     }
+
+    public function destroy()
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
+            exit;
+        }
+
+        $id = $_POST['id'] ?? null;
+
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'ID não fornecido.']);
+            exit;
+        }
+
+        if ($this->fundacaoRepository->delete((int)$id)) {
+            echo json_encode(['success' => true, 'message' => 'Fundação deletada com sucesso.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao deletar a fundação.']);
+        }
+        exit;
+    }
 }

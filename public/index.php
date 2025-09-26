@@ -64,6 +64,10 @@ switch ($uri) {
         $controller->list();
         break;
 
+    case '/fundacoes/deletar':
+        $controller->destroy();
+        break;
+
     default:
         http_response_code(404);
         echo "404 - Página não encontrada";

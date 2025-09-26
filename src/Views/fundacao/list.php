@@ -10,7 +10,6 @@
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CNPJ</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-mail</th>
                     <th scope="col" class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
                 </tr>
@@ -20,7 +19,6 @@
                     <tr id="fundacao-row-<?= $fundacao->id ?>">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= htmlspecialchars($fundacao->nome) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= htmlspecialchars($fundacao->cnpj) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= htmlspecialchars($fundacao->telefone) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= htmlspecialchars($fundacao->email) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button class="text-indigo-600 hover:text-indigo-900 btn-edit">Editar</button>
@@ -32,3 +30,54 @@
         </table>
     <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener('click', function(event) {
+    if (event.target.matches('.btn-delete')) {
+        const fundacaoId = event.target.dataset.id;
+        const fundacaoNome = event.target.dataset.nome;
+
+        Swal.fire({
+            title: 'Você tem certeza?',
+            text: `Você está prestes a deletar a fundação "${fundacaoNome}". Esta ação não pode ser desfeita!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, deletar!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('id', fundacaoId);
+
+                fetch('/fundacoes/deletar', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Deletado!',
+                            'A fundação foi deletada com sucesso.',
+                            'success'
+                        );
+                        
+                        const tableRow = document.getElementById('fundacao-row-' + fundacaoId);
+                        if (tableRow) {
+                            tableRow.remove();
+                        }
+                    } else {
+                        Swal.fire(
+                            'Erro!',
+                            data.message,
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+});
+</script>

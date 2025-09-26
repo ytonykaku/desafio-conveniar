@@ -21,8 +21,8 @@ class FundacaoControllerTest extends TestCase
         $this->connection = $db->getConnection();
         $this->controller = new FundacaoController($this->connection);
     }
-    
-    public function it_returns_an_error_if_cnpj_is_invalid()
+
+    public function test_it_returns_an_error_if_cnpj_is_invalid(): void
     {
         $_POST = [
             'nome' => 'Fundação com CNPJ Inválido',
@@ -32,17 +32,14 @@ class FundacaoControllerTest extends TestCase
         ];
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
-        ob_start();
-        $this->controller->store();
-        $output = ob_get_clean();
-        
+        $output = $this->controller->store();
         $response = json_decode($output, true);
-        
+
         $this->assertFalse($response['success']);
         $this->assertEquals('O CNPJ fornecido é inválido.', $response['message']);
     }
 
-    public function it_returns_an_error_if_cnpj_is_duplicated()
+    public function test_it_returns_an_error_if_cnpj_is_duplicated(): void
     {
         $_POST = [
             'nome' => 'Primeira Fundação',
@@ -51,16 +48,18 @@ class FundacaoControllerTest extends TestCase
             'email' => 'primeira@teste.com'
         ];
         $_SERVER['REQUEST_METHOD'] = 'POST';
-        ob_start();
         $this->controller->store();
-        ob_end_clean();
 
-        ob_start();
-        $this->controller->store();
-        $output = ob_get_clean();
-
+        $_POST = [
+            'nome' => 'Fundação Duplicada',
+            'cnpj' => '11.222.333/0001-44',
+            'instituicao_apoiada' => 'Teste',
+            'email' => 'duplicada@teste.com'
+        ];
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $output = $this->controller->store();
         $response = json_decode($output, true);
-        
+
         $this->assertFalse($response['success']);
         $this->assertEquals('Este CNPJ já foi cadastrado.', $response['message']);
     }

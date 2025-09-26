@@ -6,7 +6,7 @@ use Src\Models\Fundacao;
 
 class FundacaoTest extends TestCase
 {
-    public function it_can_be_instantiated_with_required_properties()
+    public function test_can_be_instantiated_with_required_properties()
     {
         $fundacao = new Fundacao(
             'Fundação Teste',
@@ -22,7 +22,7 @@ class FundacaoTest extends TestCase
         $this->assertNull($fundacao->telefone);
     }
 
-    public function it_can_be_instantiated_with_all_properties()
+    public function test_can_be_instantiated_with_all_properties()
     {
         $fundacao = new Fundacao(
             'Fundação Completa',
@@ -33,6 +33,8 @@ class FundacaoTest extends TestCase
         );
 
         $this->assertEquals('Fundação Completa', $fundacao->nome);
+        $this->assertEquals('99.888.777/0001-66', $fundacao->cnpj);
+        $this->assertEquals('Instituição Completa', $fundacao->instituicao_apoiada);
         $this->assertEquals('contato@completo.com', $fundacao->email);
         $this->assertEquals('(31) 98765-4321', $fundacao->telefone);
     }

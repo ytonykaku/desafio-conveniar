@@ -14,7 +14,30 @@ class FundacaoController extends BaseController
         parent::__construct($connection);
         $this->fundacaoRepository = new FundacaoRepository($connection);
     }
-    
+
+    protected function input(array $source, string $key, bool $required = false)
+    {
+        $value = $source[$key] ?? null;
+
+        if ($required && ($value === null || trim($value) === '')) {
+            return $this->jsonResponse(['success' => false, 'message' => "O campo '{$key}' é obrigatório."]);
+        }
+
+        return $value !== null ? trim($value) : null;
+    }
+    protected function jsonResponse(array $data)
+    {
+        $response = json_encode($data);
+
+        if (PHP_SAPI === 'cli') {
+            return $response;
+        }
+
+        header('Content-Type: application/json');
+        echo $response;
+        exit;
+    }
+
     public function index()
     {
         $this->view('home', ['pageTitle' => 'Página Inicial']);
@@ -27,43 +50,34 @@ class FundacaoController extends BaseController
 
     public function store()
     {
-        header('Content-Type: application/json');
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
-            exit;
+            return $this->jsonResponse(['success' => false, 'message' => 'Método não permitido.']);
         }
 
-        $cnpj = preg_replace('/[^0-9]/', '', $_POST['cnpj']);
+        $cnpj = preg_replace('/\D/', '', $this->input($_POST, 'cnpj', true));
 
         if (strlen($cnpj) !== 14) {
-            echo json_encode(['success' => false, 'message' => 'O CNPJ fornecido é inválido.']);
-            exit;
+            return $this->jsonResponse(['success' => false, 'message' => 'O CNPJ fornecido é inválido.']);
         }
 
-        $fundacaoExistente = $this->fundacaoRepository->findByCnpj($cnpj);
-        
-        if ($fundacaoExistente) {
-            echo json_encode(['success' => false, 'message' => 'Este CNPJ já foi cadastrado.']);
-            exit;
+        if ($this->fundacaoRepository->findByCnpj($cnpj)) {
+            return $this->jsonResponse(['success' => false, 'message' => 'Este CNPJ já foi cadastrado.']);
         }
 
         $fundacao = new Fundacao(
-            trim($_POST['nome']),
+            $this->input($_POST, 'nome', true),
             $cnpj,
-            trim($_POST['email']),
-            trim($_POST['telefone']),
-            trim($_POST['instituicao_apoiada'])
+            $this->input($_POST, 'instituicao_apoiada', true),
+            $this->input($_POST, 'email'),
+            $this->input($_POST, 'telefone')
         );
 
         if ($this->fundacaoRepository->save($fundacao)) {
             $fundacao->id = $this->connection->lastInsertId();
-            
-            echo json_encode(['success' => true, 'fundacao' => $fundacao]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Ocorreu um erro ao salvar no banco de dados.']);
+            return $this->jsonResponse(['success' => true, 'fundacao' => $fundacao]);
         }
-        exit;
+
+        return $this->jsonResponse(['success' => false, 'message' => 'Ocorreu um erro ao salvar no banco de dados.']);
     }
 
     public function list()
@@ -78,89 +92,61 @@ class FundacaoController extends BaseController
 
     public function update()
     {
-        header('Content-Type: application/json');
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
-            exit;
+            return $this->jsonResponse(['success' => false, 'message' => 'Método não permitido.']);
         }
-        
-        $id = $_POST['id'] ?? null;
-        $cnpj = trim($_POST['cnpj']);
 
-        if (!$id) {
-            echo json_encode(['success' => false, 'message' => 'ID não fornecido.']);
-            exit;
-        }
+        $id = $this->input($_POST, 'id', true);
+        $cnpj = $this->input($_POST, 'cnpj', true);
 
         $fundacaoExistente = $this->fundacaoRepository->findByCnpj($cnpj);
         if ($fundacaoExistente && $fundacaoExistente->id != $id) {
-            echo json_encode(['success' => false, 'message' => 'Este CNPJ já pertence a outro cadastro.']);
-            exit;
+            return $this->jsonResponse(['success' => false, 'message' => 'Este CNPJ já pertence a outro cadastro.']);
         }
 
         $fundacao = $this->fundacaoRepository->findById((int)$id);
         if (!$fundacao) {
-            echo json_encode(['success' => false, 'message' => 'Fundação não encontrada.']);
-            exit;
+            return $this->jsonResponse(['success' => false, 'message' => 'Fundação não encontrada.']);
         }
 
-        $fundacao->nome = trim($_POST['nome']);
+        $fundacao->nome = $this->input($_POST, 'nome', true);
         $fundacao->cnpj = $cnpj;
-        $fundacao->email = trim($_POST['email']);
-        $fundacao->telefone = trim($_POST['telefone']);
-        $fundacao->instituicao_apoiada = trim($_POST['instituicao_apoiada']);
+        $fundacao->instituicao_apoiada = $this->input($_POST, 'instituicao_apoiada', true);
+        $fundacao->email = $this->input($_POST, 'email');
+        $fundacao->telefone = $this->input($_POST, 'telefone');
 
         if ($this->fundacaoRepository->save($fundacao)) {
-            echo json_encode(['success' => true, 'fundacao' => $fundacao]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao atualizar a fundação.']);
+            return $this->jsonResponse(['success' => true, 'fundacao' => $fundacao]);
         }
-        exit;
+
+        return $this->jsonResponse(['success' => false, 'message' => 'Erro ao atualizar a fundação.']);
     }
 
     public function find()
     {
-        header('Content-Type: application/json');
-
-        $cnpj = $_GET['cnpj'] ?? '';
-
-        if (empty($cnpj)) {
-            echo json_encode(['success' => false, 'message' => 'CNPJ não fornecido.']);
-            exit;
-        }
+        $cnpj = $this->input($_GET, 'cnpj', true);
 
         $fundacao = $this->fundacaoRepository->findByCnpj($cnpj);
 
         if ($fundacao) {
-            echo json_encode(['success' => true, 'fundacao' => $fundacao]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Fundação não encontrada.']);
+            return $this->jsonResponse(['success' => true, 'fundacao' => $fundacao]);
         }
-        exit;
+
+        return $this->jsonResponse(['success' => false, 'message' => 'Fundação não encontrada.']);
     }
 
     public function destroy()
     {
-        header('Content-Type: application/json');
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
-            exit;
+            return $this->jsonResponse(['success' => false, 'message' => 'Método não permitido.']);
         }
 
-        $id = $_POST['id'] ?? null;
-
-        if (!$id) {
-            echo json_encode(['success' => false, 'message' => 'ID não fornecido.']);
-            exit;
-        }
+        $id = $this->input($_POST, 'id', true);
 
         if ($this->fundacaoRepository->delete((int)$id)) {
-            echo json_encode(['success' => true, 'message' => 'Fundação deletada com sucesso.']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao deletar a fundação.']);
+            return $this->jsonResponse(['success' => true, 'message' => 'Fundação deletada com sucesso.']);
         }
-        exit;
+
+        return $this->jsonResponse(['success' => false, 'message' => 'Erro ao deletar a fundação.']);
     }
 }

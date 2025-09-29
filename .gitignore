@@ -1,5 +1,4 @@
 /vendor/
 .vscode/
 .idea/
-config/database.php
 .env

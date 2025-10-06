@@ -56,7 +56,7 @@ Certifique-se de ter o **Docker** e o **Docker Compose** instalados e rodando na
 ### 1. Clone o Repositório
 
 ```bash
-git clone <url-do-seu-repositorio>
+git clone <git@github.com:ytonykaku/desafio-conveniar.git>
 cd desafio-conveniar
 ```
 
